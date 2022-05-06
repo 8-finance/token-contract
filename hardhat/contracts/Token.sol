@@ -5,9 +5,9 @@ contract EightFinCon is ERC20 {
     bool public testMode;
 
     constructor (bool testModeVar) ERC20("8fin_test", "8fin_test") {
-            testMode = testModeVar;
-            _mint(tx.origin, 1000000000000000000000000000);
-        }
+        testMode = testModeVar;
+        _mint(tx.origin, 1000000000000000000000000000);
+    }
     function mint (uint256 amount) public {
         require(testMode, 'No testmode activated');
         _mint(tx.origin, amount);
