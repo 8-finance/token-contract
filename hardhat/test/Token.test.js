@@ -68,4 +68,32 @@ describe('PrivateSale Contract', async function () {
     const info = await privateSaleContract.tokenAddress()
     expect(info).to.be.eq(tokenContract.address)
   })
+
+  it('should set price only by owner', async function () {
+    let resultPrice = await privateSaleContract.tokenPrice();
+    expect(resultPrice).to.be.eq(0);
+    await privateSaleContract.setPrice(10);
+    resultPrice = await privateSaleContract.tokenPrice();
+    expect(resultPrice.toString()).to.be.eq("10");
+
+    let error = false;
+    try {
+      const setPriceByOtherResult = await privateSaleContract.connect(acc2).setPrice(100);
+    } catch (e) {
+      error = true
+    }
+    expect(error).to.be.true
+  })
+
+  it('should make migration of tokens from base account to private sale contract', async function () {
+    let psBalance
+    psBalance = await tokenContract.balanceOf(privateSaleContract.address)
+    expect(psBalance).to.be.eq(0)
+
+    const tx = await tokenContract.connect(acc1).transfer(privateSaleContract.address, 100000)
+    await tx.wait()
+
+    psBalance = await tokenContract.balanceOf(privateSaleContract.address)
+    expect(psBalance.toString()).to.be.eq('100000')
+  })
 })
