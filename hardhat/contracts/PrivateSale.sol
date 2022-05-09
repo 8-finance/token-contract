@@ -9,7 +9,7 @@ abstract contract ERC20Interface {
 contract PrivateSale is Ownable {
     address public tokenAddress;
     uint public tokenPrice;
-    uint public tokenDebt;
+    uint tokenDebt;
 
     struct Payment {
         uint amount;
@@ -63,6 +63,10 @@ contract PrivateSale is Ownable {
 
     function getMyPayments () public view returns (Payment[] memory) {
         return balances[msg.sender].payments;
+    }
+
+    function getTokenDebt () public view onlyOwner returns (uint)  {
+        return tokenDebt;
     }
 }
 

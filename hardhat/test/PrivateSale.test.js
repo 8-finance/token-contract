@@ -44,6 +44,10 @@ describe('PrivateSale Contract', async function () {
     return privateSaleContract.setPrice(defaultPrice)
   }
 
+  function buyDefaultAmount () {
+    return privateSaleContract.buyToken(defaultUsdAmount)
+  }
+
   it('should make migration of tokens from base account to private sale contract', async function () {
     expect(await tokenContract.balanceOf(privateSaleContract.address)).to.be.eq(0)
     await migrateMoney()
@@ -58,7 +62,7 @@ describe('PrivateSale Contract', async function () {
   it('should buy token without errors', async function () {
     await migrateMoney()
     await setPrice()
-    await privateSaleContract.connect(acc1).buyToken(defaultUsdAmount)
+    await buyDefaultAmount()
     const myData = await privateSaleContract.balances(acc1.address)
     expect(myData.totalPayments).to.be.eq(1)
     expect(myData.totalUsd).to.be.eq(defaultUsdAmount)
@@ -70,4 +74,13 @@ describe('PrivateSale Contract', async function () {
     expect(payments[0].tokensAmount).eq(defaultUsdAmount / defaultPrice)
   })
 
+  it('should calculate right debt and show it only to owner', async function () {
+    const debt = await privateSaleContract.getTokenDebt();
+    expect(debt).eq(0);
+    await migrateMoney()
+    await setPrice()
+    await buyDefaultAmount()
+    const debtAfterBuy = await privateSaleContract.getTokenDebt();
+    expect(debtAfterBuy).eq(defaultUsdAmount / defaultPrice);
+  })
 })
