@@ -77,6 +77,7 @@ describe('PrivateSale Contract', async function () {
   it('should calculate right debt and show it only to owner', async function () {
     const debt = await privateSaleContract.getTokenDebt();
     expect(debt).eq(0);
+    expect(privateSaleContract.connect(acc2).getTokenDebt()).to.throw;
     await migrateMoney()
     await setPrice()
     await buyDefaultAmount()
