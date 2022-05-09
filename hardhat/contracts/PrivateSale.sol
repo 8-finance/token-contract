@@ -15,6 +15,7 @@ contract PrivateSale is Ownable {
         uint amount;
         uint timestamp;
         uint price;
+        uint tokensAmount;
         address from;
     }
 
@@ -22,7 +23,7 @@ contract PrivateSale is Ownable {
         uint totalPayments;
         uint totalUsd;
         uint totalPreparedTokens;
-        mapping(uint => Payment) payments;
+        Payment[] payments;
     }
 
     mapping(address => Balance) public balances;
@@ -43,21 +44,25 @@ contract PrivateSale is Ownable {
     function buyToken(uint amount) public {
         require(tokenPrice > 0, "Token price must be not zero");
         uint byBalance = ERC20Interface(tokenAddress).balanceOf(address(this));
-        uint amountOfTokens = amount / tokenPrice;
-        require((tokenDebt + amountOfTokens) < byBalance, "Not enoung tokens on PS contract");
-        uint paymentNum = balances[msg.sender].totalPayments;
+        uint tokensAmount = amount / tokenPrice;
+        require((tokenDebt + tokensAmount) < byBalance, "Not enoung tokens on PS contract");
         balances[msg.sender].totalPayments++;
 
         Payment memory newPayment = Payment(
             amount,
             block.timestamp,
             tokenPrice,
+            tokensAmount,
             msg.sender
         );
         balances[msg.sender].totalUsd += amount;
         balances[msg.sender].totalPreparedTokens += amount / tokenPrice;
-        balances[msg.sender].payments[paymentNum] = newPayment;
-        tokenDebt+=amountOfTokens;
+        balances[msg.sender].payments.push(newPayment);
+        tokenDebt+=tokensAmount;
+    }
+
+    function getMyPayments () public view returns (Payment[] memory) {
+        return balances[msg.sender].payments;
     }
 }
 
