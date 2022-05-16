@@ -10,6 +10,7 @@ contract PrivateSale is Ownable {
     address public tokenAddress;
     uint public tokenPrice;
     uint tokenDebt;
+    address public usdContractAddress;
     uint public vestingTime;
     struct Payment {
         uint amount;
@@ -31,6 +32,7 @@ contract PrivateSale is Ownable {
 
     constructor (address _tokenAddress) {
         tokenAddress = _tokenAddress;
+        usdContractAddress = _tokenAddress;
     }
 
     function setPrice(uint _tokenPrice) public onlyOwner {
@@ -45,6 +47,8 @@ contract PrivateSale is Ownable {
     }
     // Amount is transfered now. Later it will be native erc-20 transfer of usdt by approvance
     function buyToken(uint amount) public {
+        (bool s,) = usdContractAddress.call(abi.encodeWithSelector(bytes4(keccak256(bytes('transferFrom(address,address,uint256)'))), msg.sender, address(this), amount));
+        require(s, 'Transfer error');
         require(tokenPrice > 0, "Token price must be not zero");
         uint byBalance = ERC20Interface(tokenAddress).balanceOf(address(this));
         uint tokensAmount = amount / tokenPrice;
