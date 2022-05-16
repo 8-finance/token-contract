@@ -10,7 +10,7 @@ contract PrivateSale is Ownable {
     address public tokenAddress;
     uint public tokenPrice;
     uint tokenDebt;
-
+    uint vestingTime;
     struct Payment {
         uint amount;
         uint timestamp;
@@ -40,7 +40,9 @@ contract PrivateSale is Ownable {
     function getTokenBalance(address addr) public view returns (uint byBalance) { //todo delete 
         byBalance = ERC20Interface(tokenAddress).balanceOf(addr);
     }
-
+    function changeVestingTime (uint time) public onlyOwner {
+        vestingTime = time;
+    }
     // Amount is transfered now. Later it will be native erc-20 transfer of usdt by approvance
     function buyToken(uint amount) public {
         require(tokenPrice > 0, "Token price must be not zero");
@@ -72,8 +74,15 @@ contract PrivateSale is Ownable {
     }
 
     function calculateMyWithdrawAvailable() public view returns (uint) {
-        memory Balance myBalance = balances[msg.sender];
-        return 100;
+        uint amount = 0;
+        for(uint i = 0; i <= balances[msg.sender].totalPayments - 1; i++) {
+            if (block.timestamp - balances[msg.sender].payments[i].timestamp >= vestingTime) {
+                amount += balances[msg.sender].payments[i].amount;
+            } else {
+                amount += balances[msg.sender].payments[i].amount / (vestingTime / (block.timestamp - balances[msg.sender].payments[i].timestamp));
+            }
+        }
+        return amount;
     }
 
     function calculatePaymentWithdrawAvailable(Payment memory payment) public view returns (uint amount) {
