@@ -30,9 +30,12 @@ contract PrivateSale is Ownable {
 
     mapping(address => Balance) public balances;
 
-    constructor (address _tokenAddress) {
+    constructor (
+        address _tokenAddress,
+        address _usdContractAddress
+        ) {
         tokenAddress = _tokenAddress;
-        usdContractAddress = _tokenAddress;
+        usdContractAddress = _usdContractAddress;
     }
 
     function setPrice(uint _tokenPrice) public onlyOwner {
@@ -89,9 +92,6 @@ contract PrivateSale is Ownable {
         return amount;
     }
 
-    function calculatePaymentWithdrawAvailable(Payment memory payment) public view returns (uint amount) {
-        amount = payment.tokensAmount;
-    }
     function claimMyMoney () public {
         uint amount = 0;
         for(uint i = 0; i <= balances[msg.sender].totalPayments - 1; i++) {
