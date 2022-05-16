@@ -77,12 +77,33 @@ contract PrivateSale is Ownable {
         uint amount = 0;
         for(uint i = 0; i <= balances[msg.sender].totalPayments - 1; i++) {
             if (block.timestamp - balances[msg.sender].payments[i].timestamp >= vestingTime) {
-                amount += balances[msg.sender].payments[i].tokensAmount;
+                amount += balances[msg.sender].payments[i].tokensAmount - balances[msg.sender].payments[i].withdrawed;
             } else {
-                amount += balances[msg.sender].payments[i].tokensAmount / (vestingTime / (block.timestamp - balances[msg.sender].payments[i].timestamp));
+                amount += (balances[msg.sender].payments[i].tokensAmount / (vestingTime / (block.timestamp - balances[msg.sender].payments[i].timestamp)))  - balances[msg.sender].payments[i].withdrawed;
             }
         }
         return amount;
+    }
+
+    function calculatePaymentWithdrawAvailable(Payment memory payment) public view returns (uint amount) {
+        amount = payment.tokensAmount;
+    }
+    function claimMyMoney () public {
+        uint amount = 0;
+        for(uint i = 0; i <= balances[msg.sender].totalPayments - 1; i++) {
+            if (block.timestamp - balances[msg.sender].payments[i].timestamp >= vestingTime) {
+                uint money = balances[msg.sender].payments[i].amount;
+                amount += money - balances[msg.sender].payments[i].withdrawed;
+                balances[msg.sender].payments[i].withdrawed = money;
+            } else {
+                uint money = balances[msg.sender].payments[i].amount / (vestingTime / (block.timestamp - balances[msg.sender].payments[i].timestamp));
+                amount += money - balances[msg.sender].payments[i].withdrawed;
+                balances[msg.sender].payments[i].withdrawed += money - balances[msg.sender].payments[i].withdrawed;
+
+            }
+        }
+        (bool status, ) = tokenAddress.call(abi.encodeWithSelector(bytes4(keccak256(bytes('transfer(address,uint256)'))), msg.sender, amount));
+        require (status, 'transfer error');
     }
 }
 
