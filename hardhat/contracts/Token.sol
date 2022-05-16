@@ -2,6 +2,8 @@
 pragma solidity >=0.7.0 <0.9.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 /**
+   * @title ContractName
+   * @dev ContractDescription
    * @custom:dev-run-script ./deploy.js
    */
 contract EightFinCon is ERC20 {
