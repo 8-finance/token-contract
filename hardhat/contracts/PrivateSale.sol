@@ -77,16 +77,12 @@ contract PrivateSale is Ownable {
         uint amount = 0;
         for(uint i = 0; i <= balances[msg.sender].totalPayments - 1; i++) {
             if (block.timestamp - balances[msg.sender].payments[i].timestamp >= vestingTime) {
-                amount += balances[msg.sender].payments[i].amount;
+                amount += balances[msg.sender].payments[i].tokensAmount;
             } else {
-                amount += balances[msg.sender].payments[i].amount / (vestingTime / (block.timestamp - balances[msg.sender].payments[i].timestamp));
+                amount += balances[msg.sender].payments[i].tokensAmount / (vestingTime / (block.timestamp - balances[msg.sender].payments[i].timestamp));
             }
         }
         return amount;
-    }
-
-    function calculatePaymentWithdrawAvailable(Payment memory payment) public view returns (uint amount) {
-        amount = payment.tokensAmount;
     }
 }
 
