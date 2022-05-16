@@ -6,6 +6,7 @@ describe('PrivateSale Contract', async function () {
   let acc2
   let tokenContract
   let privateSaleContract
+  let usdtContract;
   const defaultPrice = 50
   const defaultVesting = 300
   const defaultUsdAmount = 500
@@ -13,7 +14,8 @@ describe('PrivateSale Contract', async function () {
   beforeEach(async function () {
     [acc1, acc2] = await ethers.getSigners()
     tokenContract = await helpers.createTokenContract(acc1)
-    privateSaleContract = await helpers.createPrivateSaleContract(acc1, tokenContract)
+    usdtContract = tokenContract;
+    privateSaleContract = await helpers.createPrivateSaleContract(acc1, tokenContract, usdtContract)
   })
 
   it('both contract should be deployed', async function () {
@@ -50,7 +52,8 @@ describe('PrivateSale Contract', async function () {
 
   }
 
-  function buyDefaultAmount () {
+  async function buyDefaultAmount () {
+    await usdtContract.approve(privateSaleContract.address, defaultUsdAmount);
     return privateSaleContract.buyToken(defaultUsdAmount)
   }
 
@@ -104,5 +107,29 @@ describe('PrivateSale Contract', async function () {
     await setVestingTime();
     const amount = await privateSaleContract.vestingTime()
     expect(amount).eq(defaultVesting);
+  })
+
+  async function mineNBlocks(n) {
+    console.log('start mining')
+    for (let index = 0; index < n; index++) {
+      await ethers.provider.send('evm_mine');
+      process.stdout.write(`*`);
+    }
+    console.log('finish mining')
+  }
+
+  it('should calculate right vesting time', async function () {
+    await migrateMoney()
+    await setPrice()
+    await usdtContract.approve(privateSaleContract.address, defaultUsdAmount)
+    await buyDefaultAmount()
+    const tx = await setVestingTime();
+    const payments = await privateSaleContract.getMyPayments()
+    const timestampStart = payments[0].timestamp;
+    await mineNBlocks(200);
+    const availableWithdraw = await privateSaleContract.calculateMyWithdrawAvailable();
+    const timestampEnd = availableWithdraw[1];
+    const expectedWithdraw = Math.floor((defaultUsdAmount / defaultPrice) * (timestampEnd - timestampStart) / defaultVesting);
+    expect(expectedWithdraw).eq(availableWithdraw[0]);
   })
 })

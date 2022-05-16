@@ -21,6 +21,8 @@ contract PrivateSale is Ownable {
         address from;
     }
 
+    uint multiplier = 1000;
+
     struct Balance {
         uint totalPayments;
         uint totalUsd;
@@ -80,16 +82,28 @@ contract PrivateSale is Ownable {
         return tokenDebt;
     }
 
-    function calculateMyWithdrawAvailable() public view returns (uint) {
+    function changeMultiplier (uint _multiplier) public onlyOwner {
+        multiplier = _multiplier;
+    }
+
+    function calculateMyWithdrawAvailable() public view returns (uint, uint) {
         uint amount = 0;
         for(uint i = 0; i <= balances[msg.sender].totalPayments - 1; i++) {
             if (block.timestamp - balances[msg.sender].payments[i].timestamp >= vestingTime) {
                 amount += balances[msg.sender].payments[i].tokensAmount - balances[msg.sender].payments[i].withdrawed;
             } else {
-                amount += (balances[msg.sender].payments[i].tokensAmount / (vestingTime / (block.timestamp - balances[msg.sender].payments[i].timestamp)))  - balances[msg.sender].payments[i].withdrawed;
+                amount += (
+                    (
+                        multiplier * (block.timestamp - balances[msg.sender].payments[i].timestamp)
+                        /
+                        vestingTime
+                    )
+                    * balances[msg.sender].payments[i].tokensAmount
+                    / multiplier
+                    )  - balances[msg.sender].payments[i].withdrawed;
             }
         }
-        return amount;
+        return (amount, block.timestamp);
     }
 
     function claimMyMoney () public {
@@ -103,7 +117,6 @@ contract PrivateSale is Ownable {
                 uint money = balances[msg.sender].payments[i].amount / (vestingTime / (block.timestamp - balances[msg.sender].payments[i].timestamp));
                 amount += money - balances[msg.sender].payments[i].withdrawed;
                 balances[msg.sender].payments[i].withdrawed += money - balances[msg.sender].payments[i].withdrawed;
-
             }
         }
         (bool status, ) = tokenAddress.call(abi.encodeWithSelector(bytes4(keccak256(bytes('transfer(address,uint256)'))), msg.sender, amount));

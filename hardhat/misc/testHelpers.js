@@ -5,9 +5,9 @@ module.exports = {
     await tokenContract.deployed()
     return tokenContract;
   },
-  async createPrivateSaleContract (acc1, tokenContract) {
+  async createPrivateSaleContract (acc1, tokenContract, usdtContract) {
     const PrivateSaleContractData = await ethers.getContractFactory('PrivateSale', acc1)
-    const privateSaleContract = await PrivateSaleContractData.deploy(tokenContract.address)
+    const privateSaleContract = await PrivateSaleContractData.deploy(tokenContract.address,usdtContract.address)
     await privateSaleContract.deployed()
     return privateSaleContract;
   }
