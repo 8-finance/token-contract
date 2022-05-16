@@ -84,4 +84,12 @@ describe('PrivateSale Contract', async function () {
     const debtAfterBuy = await privateSaleContract.getTokenDebt();
     expect(debtAfterBuy).eq(defaultUsdAmount / defaultPrice);
   })
+
+  it('should calculate my tokens to withdraw', async function () {
+    await migrateMoney()
+    await setPrice()
+    await buyDefaultAmount()
+    const amount = await privateSaleContract.getTokenDebt();
+
+  })
 })

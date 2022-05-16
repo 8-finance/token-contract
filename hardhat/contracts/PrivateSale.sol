@@ -16,6 +16,7 @@ contract PrivateSale is Ownable {
         uint timestamp;
         uint price;
         uint tokensAmount;
+        uint withdrawed;
         address from;
     }
 
@@ -53,6 +54,7 @@ contract PrivateSale is Ownable {
             block.timestamp,
             tokenPrice,
             tokensAmount,
+            0,
             msg.sender
         );
         balances[msg.sender].totalUsd += amount;
@@ -67,6 +69,15 @@ contract PrivateSale is Ownable {
 
     function getTokenDebt () public view onlyOwner returns (uint)  {
         return tokenDebt;
+    }
+
+    function calculateMyWithdrawAvailable() public view returns (uint) {
+        memory Balance myBalance = balances[msg.sender];
+        return 100;
+    }
+
+    function calculatePaymentWithdrawAvailable(Payment memory payment) public view returns (uint amount) {
+        amount = payment.tokensAmount;
     }
 }
 
