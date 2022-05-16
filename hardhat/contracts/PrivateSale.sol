@@ -10,7 +10,7 @@ contract PrivateSale is Ownable {
     address public tokenAddress;
     uint public tokenPrice;
     uint tokenDebt;
-    uint vestingTime;
+    uint public vestingTime;
     struct Payment {
         uint amount;
         uint timestamp;
@@ -104,6 +104,14 @@ contract PrivateSale is Ownable {
         }
         (bool status, ) = tokenAddress.call(abi.encodeWithSelector(bytes4(keccak256(bytes('transfer(address,uint256)'))), msg.sender, amount));
         require (status, 'transfer error');
+    }
+
+    function getMyFullAvailableWithdraw() public view returns (uint) {
+        uint amount = 0;
+        for(uint i = 0; i <= balances[msg.sender].totalPayments - 1; i++) {
+            amount += balances[msg.sender].payments[i].tokensAmount;
+        }
+        return amount;
     }
 }
 

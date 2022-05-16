@@ -7,6 +7,7 @@ describe('PrivateSale Contract', async function () {
   let tokenContract
   let privateSaleContract
   const defaultPrice = 50
+  const defaultVesting = 300
   const defaultUsdAmount = 500
 
   beforeEach(async function () {
@@ -44,6 +45,11 @@ describe('PrivateSale Contract', async function () {
     return privateSaleContract.setPrice(defaultPrice)
   }
 
+  function setVestingTime () {
+    return privateSaleContract.changeVestingTime(defaultVesting)
+
+  }
+
   function buyDefaultAmount () {
     return privateSaleContract.buyToken(defaultUsdAmount)
   }
@@ -75,21 +81,28 @@ describe('PrivateSale Contract', async function () {
   })
 
   it('should calculate right debt and show it only to owner', async function () {
-    const debt = await privateSaleContract.getTokenDebt();
-    expect(debt).eq(0);
-    expect(privateSaleContract.connect(acc2).getTokenDebt()).to.throw;
+    const debt = await privateSaleContract.getTokenDebt()
+    expect(debt).eq(0)
+    expect(privateSaleContract.connect(acc2).getTokenDebt()).to.throw
     await migrateMoney()
     await setPrice()
     await buyDefaultAmount()
-    const debtAfterBuy = await privateSaleContract.getTokenDebt();
-    expect(debtAfterBuy).eq(defaultUsdAmount / defaultPrice);
+    const debtAfterBuy = await privateSaleContract.getTokenDebt()
+    expect(debtAfterBuy).eq(defaultUsdAmount / defaultPrice)
   })
 
-  it('should calculate my tokens to withdraw', async function () {
+  it('should calculate full of my tokens to withdraw', async function () {
     await migrateMoney()
     await setPrice()
     await buyDefaultAmount()
-    const amount = await privateSaleContract.getTokenDebt();
+    await buyDefaultAmount()
+    const amount = await privateSaleContract.getMyFullAvailableWithdraw()
+    expect(amount).eq(2 * defaultUsdAmount / defaultPrice)
+  })
 
+  it('should set vesting time correctly', async function () {
+    await setVestingTime();
+    const amount = await privateSaleContract.vestingTime()
+    expect(amount).eq(defaultVesting);
   })
 })
