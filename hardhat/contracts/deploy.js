@@ -29,10 +29,10 @@
       .connect(acc1)
       .transfer(privateSaleContract.address, 100000);
     await tx.wait();
-    privateSaleContract.setPrice(defaultPrice);
-    privateSaleContract.changeVestingTime(defaultVesting);
+    await privateSaleContract.setPrice(defaultPrice);
+    await privateSaleContract.changeVestingTime(defaultVesting);
     await usdtContract.approve(privateSaleContract.address, defaultUsdAmount);
-    privateSaleContract.connect(acc2).buyToken(defaultUsdAmount);
+    await privateSaleContract.buyToken(defaultUsdAmount);
     console.log("Done!");
   } catch (e) {
     console.log(e.message);
