@@ -1,66 +1,38 @@
 (async function () {
   try {
-    const signer1 = new ethers.providers.Web3Provider(web3Provider).getSigner(
-      0
+    const defaultPrice = 50;
+    const defaultVesting = 300;
+    const defaultUsdAmount = 500;
+    const [acc1, acc2] = await ethers.getSigners();
+    const TokenContractData = await ethers.getContractFactory(
+      "EightFinCon",
+      acc1
     );
-    const signer2 = new ethers.providers.Web3Provider(web3Provider).getSigner(
-      1
-    );
-    const tokenMetadata = JSON.parse(
-      await remix.call(
-        "fileManager",
-        "getFile",
-        "browser/artifacts/EightFinCon.json"
-      )
-    );
-
-    const privateSaleMetadata = JSON.parse(
-      await remix.call(
-        "fileManager",
-        "getFile",
-        "browser/artifacts/PrivateSale.json"
-      )
-    );
-
-    let tokenFactory = new ethers.ContractFactory(
-      tokenMetadata.abi,
-      tokenMetadata.data.bytecode.object,
-      signer1
-    );
-
-    let tokenContract = await tokenFactory.deploy("true");
-
+    const tokenContract = await TokenContractData.deploy(false);
     await tokenContract.deployed();
-
-    let privateSaleFactory = new ethers.ContractFactory(
-      privateSaleMetadata.abi,
-      privateSaleMetadata.data.bytecode.object,
-      signer1
+    const usdtContractData = await ethers.getContractFactory(
+      "EightFinCon",
+      acc1
     );
-
-    let privateSaleContract = await privateSaleFactory.deploy(
-      tokenContract.address
+    const usdtContract = await usdtContractData.deploy(false);
+    await usdtContract.deployed();
+    const PrivateSaleContractData = await ethers.getContractFactory(
+      "PrivateSale",
+      acc1
     );
-
-    await privateSaleContract.deployed();
-
-    const tokenErc20_rw = new ethers.Contract(
+    const privateSaleContract = await PrivateSaleContractData.deploy(
       tokenContract.address,
-      tokenMetadata.abi,
-      signer1
+      usdtContract.address
     );
-
-    const tx = await tokenErc20_rw.transfer(
-      privateSaleContract.address,
-      500000
-    );
+    await privateSaleContract.deployed();
+    const tx = await tokenContract
+      .connect(acc1)
+      .transfer(privateSaleContract.address, 100000);
     await tx.wait();
-    await privateSaleContract.setPrice(500);
-    await privateSaleContract.changeVestingTime(600);
-    const privateSaleContractAsSigner2 = await privateSaleContract.connect(
-      signer2
-    );
-    await privateSaleContractAsSigner2.buyToken(50000);
+    privateSaleContract.setPrice(defaultPrice);
+    privateSaleContract.changeVestingTime(defaultVesting);
+    await usdtContract.approve(privateSaleContract.address, defaultUsdAmount);
+    privateSaleContract.connect(acc2).buyToken(defaultUsdAmount);
     console.log("Done!");
   } catch (e) {
     console.log(e.message);
