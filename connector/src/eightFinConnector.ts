@@ -1,56 +1,22 @@
 import { Web3Wrapper } from "./webConnector";
 
-const abi = require("eightfin.json");
+const abi = require("./eightfin.json");
 
 export class EightFinConnector {
   constructor(
     private web3Wrapper: Web3Wrapper,
     private addresses: {
       eightFin: string;
-    },
-    private pkey: string
-  ) {}
+    }
+  ) {
+  }
 
   public async transfer(to: string, amount: number) {
     let contract = this.web3Wrapper.getContract(this.addresses.eightFin, abi);
-    const method = contract.methods.transfer(to, amount).encodeABI();
-    let transactionConfig = {
-      from: this.web3Wrapper.web3.eth.accounts[0],
-      to: this.addresses.eightFin,
-      nonce: await this.web3Wrapper.web3.eth.getTransactionCount(
-        this.web3Wrapper.web3.eth.accounts[0]
-      ),
-      gas: 100000,
-      gasPrice: await this.web3Wrapper.web3.eth.getGasPrice(),
-      data: method,
-    };
-    console.log({ transactionConfig });
-    const signedTx = await this.web3Wrapper.web3.eth.accounts.signTransaction(
-      transactionConfig,
-      this.pkey
-    );
-
-    console.log({ signedTx });
-    const result =
-      signedTx.rawTransaction &&
-      (await this.web3Wrapper.web3.eth.sendSignedTransaction(
-        signedTx.rawTransaction,
-        function (error, hash) {
-          if (!error) {
-            console.log(
-              "🎉 The hash of your transaction is: ",
-              hash,
-              "\n Check Alchemy's Mempool to view the status of your transaction!"
-            );
-          } else {
-            console.log(
-              "❗Something went wrong while submitting your transaction:",
-              error
-            );
-          }
-        }
-      ));
-    return result;
+    const method = contract.methods.transfer(to, amount);
+    return this.web3Wrapper.sendMethod(method, {
+      gasLimit: 1000000
+    });
   }
 
   public async balanceOf(address: string) {
