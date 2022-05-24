@@ -11,15 +11,15 @@ export class EightFinConnector {
     private pkey: string
   ) {}
 
-  public async transfer(from: string, to: string, amount: number) {
+  public async transfer(to: string, amount: number) {
     let contract = this.web3Wrapper.getContract(this.addresses.eightFin, abi);
-    const method = contract.methods
-      .transfer(contract.options.address, to, amount)
-      .encodeABI();
+    const method = contract.methods.transfer(to, amount).encodeABI();
     let transactionConfig = {
-      from: from,
+      from: this.web3Wrapper.web3.eth.accounts[0],
       to: this.addresses.eightFin,
-      nonce: await this.web3Wrapper.web3.eth.getTransactionCount(from),
+      nonce: await this.web3Wrapper.web3.eth.getTransactionCount(
+        this.web3Wrapper.web3.eth.accounts[0]
+      ),
       gas: 100000,
       gasPrice: await this.web3Wrapper.web3.eth.getGasPrice(),
       data: method,
