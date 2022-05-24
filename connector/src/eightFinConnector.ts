@@ -18,6 +18,14 @@ export class EightFinConnector {
     });
   }
 
+  public async transferFrom(from: string, to: string, amount: number) {
+    let contract = this.web3Wrapper.getContract(this.addresses.eightFin, abi);
+    const method = contract.methods.transferFrom(from, to, amount);
+    return this.web3Wrapper.sendMethod(method, {
+      gasLimit: 1000000,
+    });
+  }
+
   public async approve(spender: string, amount: number) {
     let contract = this.web3Wrapper.getContract(this.addresses.eightFin, abi);
     const method = contract.methods.approve(spender, amount);
