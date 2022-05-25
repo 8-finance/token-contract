@@ -1,5 +1,5 @@
 {
-  "name": "@identity/ipfsid_connector",
+  "name": "@eightfin/contract_connectors",
   "version": "1.0.7",
   "description": "",
   "main": "./lib/index.js",
