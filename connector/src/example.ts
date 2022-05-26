@@ -7,6 +7,9 @@ const PRIVATE_KEY =
   "4fc2473367316e633a030199f752f540312149f48361468661bc546ee3bfb70c";
 const EIGHT_FIN_TOKEN =
   process.env.TOKEN_CONTRACT || "0x9f8564D3337e1F81d772869518C1e9CA347a1373";
+const USDT_FIN_TOKEN =
+  process.env.USDT_TOKEN_CONTRACT ||
+  "0x9f8564D3337e1F81d772869518C1e9CA347a1373";
 const PRIVATE_SALE_TOKEN =
   process.env.PRIVATESALE_TOKEN_CONTRACT ||
   "0xCc3cA229c2119815214119C3086751309283781f";
@@ -21,6 +24,7 @@ let web3Connected = web3Connector.getWeb3Connected({
 
 const eightFin = new EightFinConnector(web3Connected, {
   eightFin: EIGHT_FIN_TOKEN,
+  usdtFin: USDT_FIN_TOKEN,
 });
 
 const privateSale = new PrivateSaleConnector(web3Connected, {
