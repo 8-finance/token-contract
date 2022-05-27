@@ -1,6 +1,6 @@
 {
-  "name": "@identity/ipfsid_connector",
-  "version": "1.0.7",
+  "name": "@eightfin/contract_connectors",
+  "version": "0.0.1",
   "description": "",
   "main": "./lib/index.js",
   "scripts": {
