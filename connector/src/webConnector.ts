@@ -6,6 +6,8 @@ const debug = require('debug')('web3_connector');
 export type ConnectorConfig = { nodeUrl: string, privateKey?: string, maxTxFee?: number };
 
 export class Web3Wrapper {
+  private address: string;
+
   get web3(): Web3 {
     return this._web3;
   }
@@ -44,7 +46,14 @@ export class Web3Wrapper {
   }
 
   public getAddress() {
-    return this._web3.eth.accounts.wallet[0].address;
+    if (!this.address) {
+      this.address = this._web3.eth.accounts.wallet[0].address;
+    }
+    return this.address;
+  }
+
+  public setAddress(address: string) {
+    this.address = address;
   }
 
   async callMethod(method: ContractSendMethod) {
