@@ -7,6 +7,7 @@ export class EightFinConnector {
     private web3Wrapper: Web3Wrapper,
     private addresses: {
       eightFin: string;
+      usdtFin: string;
     }
   ) {}
 
@@ -27,7 +28,7 @@ export class EightFinConnector {
   }
 
   public async approve(spender: string, amount: number) {
-    let contract = this.web3Wrapper.getContract(this.addresses.eightFin, abi);
+    let contract = this.web3Wrapper.getContract(this.addresses.usdtFin, abi);
     const method = contract.methods.approve(spender, amount);
     return this.web3Wrapper.sendMethod(method, {
       gasLimit: 1000000,
