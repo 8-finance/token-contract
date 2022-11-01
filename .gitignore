@@ -1,1 +1,8 @@
+node_modules
+cache
+artifacts
+contracts/.deps
+.env
+.openzeppelin
+nfts
 .idea
